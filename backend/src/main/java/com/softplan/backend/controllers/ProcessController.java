@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.softplan.backend.models.EStatus;
 import com.softplan.backend.models.Process;
 import com.softplan.backend.models.User;
 import com.softplan.backend.payload.request.ProcessRequest;
@@ -164,6 +165,23 @@ public class ProcessController {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
+	}
+	
+	@PutMapping("/{id}/finish")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> finish(@PathVariable("id") long id) {
+		try {
+			Optional<Process> processData = processRepository.findById(id);
+			if (processData.isPresent()) {
+				Process _process = processData.get();
+				_process.setStatus( EStatus.STATUS_FINISH );
+     			return new ResponseEntity<>(processRepository.save(_process), HttpStatus.OK);
+			} else {
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			}
+		} catch (Exception e) {
+			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 }
