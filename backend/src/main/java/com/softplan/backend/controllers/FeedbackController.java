@@ -53,7 +53,7 @@ public class FeedbackController {
 	UserRepository userRepository;
 
 	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> create(Authentication authentication, @PathVariable("process") Process process , @Valid @RequestBody FeedbackRequest newFeedback) {
 		try {			
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -65,7 +65,7 @@ public class FeedbackController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> index( @PathVariable("process") Process process , @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
 
 		List<Feedback> feedback = new ArrayList<Feedback>();
@@ -93,7 +93,7 @@ public class FeedbackController {
 	}
 
 	@PutMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('FINALIZADOR')")
 	public ResponseEntity<?> update( @PathVariable("process") Process process , @PathVariable("id") long id, @RequestBody FeedbackRequest feedback) {
 		try {
 			Optional<Feedback> feedbackData = feedbackRepository.findById(id);
@@ -110,7 +110,7 @@ public class FeedbackController {
 	}
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> show(@PathVariable("id") long id) {
 		try {
 			Optional<Feedback> feedbackData = feedbackRepository.findById(id);
@@ -127,7 +127,7 @@ public class FeedbackController {
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> delete(@PathVariable("id") long id) {
 		try {
 			feedbackRepository.deleteById(id);

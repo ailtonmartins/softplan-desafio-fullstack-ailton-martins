@@ -53,7 +53,7 @@ public class ProcessController {
 	UserRepository userRepository;
 
 	@PostMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR')")
 	ResponseEntity<?> create(Authentication authentication, @Valid @RequestBody ProcessRequest newProcess) {
 		try {
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
@@ -78,7 +78,7 @@ public class ProcessController {
 	}
 
 	@GetMapping
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> index(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
 
 		List<Process> process = new ArrayList<Process>();
@@ -106,7 +106,7 @@ public class ProcessController {
 	}
 
 	@PutMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR')")
 	public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody ProcessRequest process) {
 		try {
 			Optional<Process> processData = processRepository.findById(id);
@@ -139,7 +139,7 @@ public class ProcessController {
 	}
 
 	@GetMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> show(@PathVariable("id") long id) {
 		try {
 			Optional<Process> processData = processRepository.findById(id);
@@ -156,7 +156,7 @@ public class ProcessController {
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR')")
 	ResponseEntity<?> delete(@PathVariable("id") long id) {
 		try {
 			processRepository.deleteById(id);
@@ -168,7 +168,7 @@ public class ProcessController {
 	}
 	
 	@PutMapping("/{id}/finish")
-	@PreAuthorize("hasRole('ADMIN')")
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR')")
 	public ResponseEntity<?> finish(@PathVariable("id") long id) {
 		try {
 			Optional<Process> processData = processRepository.findById(id);
