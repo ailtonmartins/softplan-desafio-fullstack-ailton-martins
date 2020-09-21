@@ -2,11 +2,9 @@ package com.softplan.backend.controllers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -32,18 +30,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.softplan.backend.models.Feedback;
 import com.softplan.backend.models.Process;
-import com.softplan.backend.models.User;
-import com.softplan.backend.payload.request.ProcessRequest;
-import com.softplan.backend.payload.response.MessageResponse;
+import com.softplan.backend.payload.request.FeedbackRequest;
+import com.softplan.backend.repository.FeedbackRepository;
 import com.softplan.backend.repository.ProcessRepository;
 import com.softplan.backend.repository.UserRepository;
 import com.softplan.backend.security.services.UserDetailsImpl;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/api/process")
-public class ProcessController {
+@RequestMapping("/api/process/{process}/feedback")
+public class FeedbackController {
+	
+	@Autowired
+	FeedbackRepository feedbackRepository;
 
 	@Autowired
 	ProcessRepository processRepository;
@@ -53,24 +54,11 @@ public class ProcessController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<?> create(Authentication authentication, @Valid @RequestBody ProcessRequest newProcess) {
-		try {
+	ResponseEntity<?> create(Authentication authentication, @PathVariable("process") Process process , @Valid @RequestBody FeedbackRequest newFeedback) {
+		try {			
 			UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-
-			Set<User> users = new HashSet<>();
-			for (Long id : newProcess.getUser()) {
-				User user = userRepository.findById(id).orElse(null);
-				if (user != null) {
-					users.add(user);
-				} else {
-					return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-							.body(new MessageResponse("Error: User (" + id + ") not exist!"));
-				}
-			}
-
-			Process process = new Process(newProcess.getName(), newProcess.getDescription(), newProcess.getStatus(),
-					users, userDetails.getUser());
-			return new ResponseEntity<>(processRepository.save(process), HttpStatus.CREATED);
+			Feedback feedback = new Feedback(newFeedback.getText(), process , userDetails.getUser());
+			return new ResponseEntity<>(feedbackRepository.save(feedback), HttpStatus.CREATED);
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -78,57 +66,41 @@ public class ProcessController {
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	ResponseEntity<?> index(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+	ResponseEntity<?> index( @PathVariable("process") Process process , @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
 
-		List<Process> process = new ArrayList<Process>();
+		List<Feedback> feedback = new ArrayList<Feedback>();
 		List<Order> orders = new ArrayList<Order>();
 
 		orders.add(new Order(Sort.Direction.DESC, "id"));
 
 		Pageable pagingSort = PageRequest.of(page, size, Sort.by(orders));
 
-		Page<Process> pageProcess = processRepository.findAll(pagingSort);
+		Page<Feedback> pageFeedback = feedbackRepository.findAllByProcess( process, pagingSort);
 
-		process = pageProcess.getContent();
+		feedback = pageFeedback.getContent();
 
-		if (process.isEmpty()) {
+		if (feedback.isEmpty()) {
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		}
 
 		Map<String, Object> response = new HashMap<>();
-		response.put("process", pageProcess.getContent());
-		response.put("currentPage", pageProcess.getNumber());
-		response.put("totalItems", pageProcess.getTotalElements());
-		response.put("totalPages", pageProcess.getTotalPages());
+		response.put("feedback", feedback);
+		response.put("currentPage", pageFeedback.getNumber());
+		response.put("totalItems", pageFeedback.getTotalElements());
+		response.put("totalPages", pageFeedback.getTotalPages());
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> update(@PathVariable("id") long id, @RequestBody ProcessRequest process) {
+	public ResponseEntity<?> update( @PathVariable("process") Process process , @PathVariable("id") long id, @RequestBody FeedbackRequest feedback) {
 		try {
-			Optional<Process> processData = processRepository.findById(id);
-			if (processData.isPresent()) {
-				Process _process = processData.get();
-
-				Set<User> users = new HashSet<>();
-				for (Long idUser : process.getUser()) {
-					User user = userRepository.findById(idUser).orElse(null);
-					if (user != null) {
-						users.add(user);
-					} else {
-						return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-								.body(new MessageResponse("Error: User (" + idUser + ") not exist!"));
-					}
-				}
-
-				_process.setName(process.getName());
-				_process.setDescription(process.getDescription());
-				_process.setStatus(process.getStatus());
-				_process.setUsers(users);
-
-				return new ResponseEntity<>(processRepository.save(_process), HttpStatus.OK);
+			Optional<Feedback> feedbackData = feedbackRepository.findById(id);
+			if (feedbackData.isPresent()) {
+				Feedback _feedback = feedbackData.get();			
+				_feedback.setText(feedback.getText());				
+				return new ResponseEntity<>(feedbackRepository.save(_feedback), HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
@@ -141,10 +113,10 @@ public class ProcessController {
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<?> show(@PathVariable("id") long id) {
 		try {
-			Optional<Process> processData = processRepository.findById(id);
-			if (processData.isPresent()) {
-				Process _process = processData.get();
-				return new ResponseEntity<>(_process, HttpStatus.OK);
+			Optional<Feedback> feedbackData = feedbackRepository.findById(id);
+			if (feedbackData.isPresent()) {
+				Feedback _feedback = feedbackData.get();
+				return new ResponseEntity<>(_feedback, HttpStatus.OK);
 			} else {
 				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 			}
@@ -158,7 +130,7 @@ public class ProcessController {
 	@PreAuthorize("hasRole('ADMIN')")
 	ResponseEntity<?> delete(@PathVariable("id") long id) {
 		try {
-			processRepository.deleteById(id);
+			feedbackRepository.deleteById(id);
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

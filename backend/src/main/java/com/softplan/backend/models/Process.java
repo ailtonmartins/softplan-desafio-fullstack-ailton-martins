@@ -11,8 +11,6 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 @Entity
 @Table(	name = "process" )
 public class Process {
@@ -58,6 +56,10 @@ public class Process {
 		this.status = status;
 		this.users = users;
 		this.user = user;
+	}
+	
+	public Long getId() {
+		return id;
 	}
 
 	public String getName() {
