@@ -10,6 +10,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
+import org.springframework.security.core.context.SecurityContextHolder;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 

@@ -21,6 +21,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.softplan.backend.models.EStatus;
 import com.softplan.backend.models.Process;
+import com.softplan.backend.models.Role;
 import com.softplan.backend.models.User;
 import com.softplan.backend.payload.request.ProcessRequest;
 import com.softplan.backend.payload.response.MessageResponse;
@@ -79,17 +82,24 @@ public class ProcessController {
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR') or hasRole('FINALIZADOR')")
-	ResponseEntity<?> index(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
-
+	ResponseEntity<?> index(Authentication authentication, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+		
 		List<Process> process = new ArrayList<Process>();
 		List<Order> orders = new ArrayList<Order>();
 
 		orders.add(new Order(Sort.Direction.DESC, "id"));
 
 		Pageable pagingSort = PageRequest.of(page, size, Sort.by(orders));
-
-		Page<Process> pageProcess = processRepository.findAll(pagingSort);
-
+		
+				
+		boolean isRoleFinalizador = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_FINALIZADOR"));
+		Page<Process> pageProcess = null;
+		if (isRoleFinalizador) {
+			pageProcess = processRepository.findByStatus(EStatus.STATUS_PENDENT, pagingSort);
+		} else {
+			pageProcess = processRepository.findAll(pagingSort);
+		}
+		
 		process = pageProcess.getContent();
 
 		if (process.isEmpty()) {
@@ -182,6 +192,12 @@ public class ProcessController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	public static boolean hasRole (String roleName)
+	{
+	    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+	            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(roleName));
 	}
 
 }
