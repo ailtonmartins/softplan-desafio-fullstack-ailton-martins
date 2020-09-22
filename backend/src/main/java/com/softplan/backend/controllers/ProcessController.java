@@ -76,13 +76,16 @@ public class ProcessController {
 					users, userDetails.getUser());
 			return new ResponseEntity<>(processRepository.save(process), HttpStatus.CREATED);
 		} catch (Exception e) {
-			return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<>( null , HttpStatus.INTERNAL_SERVER_ERROR );
 		}
 	}
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR') or hasRole('FINALIZADOR')")
 	ResponseEntity<?> index(Authentication authentication, @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+		
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
 		
 		List<Process> process = new ArrayList<Process>();
 		List<Order> orders = new ArrayList<Order>();
@@ -95,7 +98,7 @@ public class ProcessController {
 		boolean isRoleFinalizador = authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_FINALIZADOR"));
 		Page<Process> pageProcess = null;
 		if (isRoleFinalizador) {
-			pageProcess = processRepository.findByStatus(EStatus.STATUS_PENDENT, pagingSort);
+			pageProcess = processRepository.findByStatusAndUsers(EStatus.STATUS_PENDENT , userDetails.getUser()  , pagingSort);
 		} else {
 			pageProcess = processRepository.findAll(pagingSort);
 		}
@@ -194,10 +197,5 @@ public class ProcessController {
 		}
 	}
 	
-	public static boolean hasRole (String roleName)
-	{
-	    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
-	            .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals(roleName));
-	}
 
 }

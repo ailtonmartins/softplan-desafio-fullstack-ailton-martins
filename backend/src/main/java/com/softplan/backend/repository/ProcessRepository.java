@@ -7,9 +7,10 @@ import org.springframework.stereotype.Repository;
 
 import com.softplan.backend.models.EStatus;
 import com.softplan.backend.models.Process;
+import com.softplan.backend.models.User;
 
 @Repository
 public interface ProcessRepository extends JpaRepository<Process, Long> {
 	Page<Process> findAll( Pageable pageable );
-	Page<Process> findByStatus(EStatus status, Pageable pageable);
+	Page<Process> findByStatusAndUsers(EStatus status, User users , Pageable pageable);
 }

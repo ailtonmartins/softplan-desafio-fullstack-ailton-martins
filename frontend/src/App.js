@@ -116,6 +116,7 @@ class App extends Component {
                         <LoginRoute exact path="/login" component={Login} />
                         <PrivateRoute exact path={["/", "/profile"]} component={Profile} />
                         <PrivateRoute path="/user" component={User} />
+                        <PrivateRoute path="/process/create" component={EditProcess} />
                         <PrivateRoute path="/process/:id" component={EditProcess} />
                         <PrivateRoute path="/process" component={ListProcess} /> 
                     </Switch>

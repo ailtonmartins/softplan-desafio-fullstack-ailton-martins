@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -91,4 +92,12 @@ public class UserController {
 
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
+	
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN') or hasRole('TRIADOR') "  )
+	public ResponseEntity<?> list() {		
+		return ResponseEntity.ok(userRepository.findAll());
+	}
+	
+	
 }
