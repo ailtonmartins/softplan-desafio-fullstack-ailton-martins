@@ -9,6 +9,8 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "feedback")
@@ -22,6 +24,7 @@ public class Feedback {
 	@Size(max = 255)
 	private String text;
 	
+	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "process_id")
 	private Process process;

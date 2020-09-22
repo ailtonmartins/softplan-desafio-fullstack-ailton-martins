@@ -16,41 +16,96 @@ const required = value => {
 export default class EditProcess extends Component {
     constructor(props) {
         super(props);
+        this.handleRegister = this.handleRegister.bind(this);
+        this.handleRegisterFeedback = this.handleRegisterFeedback.bind(this);
+        this.onChangeNewFeedback = this.onChangeNewFeedback.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
+        
+      
         this.state = {
             loading: true,
-            data: false,
+            data: {
+               name: '',
+               description: '' 
+            },
+            feedackData: false,
+            newFeedback: "",
             id: 0
         };
     }
+
+    onChangeNewFeedback(e) {
+        this.setState({
+            newFeedback: e.target.value
+        });        
+    }
+
     componentDidMount() {
+        this.loadData();
+    }
+
+    handleRegister(e) {
+        e.preventDefault();
+    }
+
+    handleRegisterFeedback(e) {
+        e.preventDefault();
+        if( this.state.newFeedback ) {
+            processService.saveFeedback(this.state.id, this.state.newFeedback).then(
+                res => {
+                    this.loadData();
+                    this.setState({
+                        newFeedback: ''
+                    });
+                },
+                error => {}
+            );
+        }
+    }
+
+    handleDelete(e) {
+        e.preventDefault();
+        if (this.state.id) {
+            processService.delete(this.state.id).then(
+                res => {
+                    this.props.history.push("/process");
+                    window.location.reload();
+                },
+                error => { }
+            );
+        }
+    }
+
+    loadData() {
         const { match: { params } } = this.props;
         if (params.id) {
             this.setState({ loading: true, id: params.id });
             processService.get(params.id).then(
                 res => {
                     const data = res.data;
+                    const feedbackData = data.feedback.map(fd => <React.Fragment>
+                        <li>
+                            <label class="small" >{fd.user.username} | {fd.createDateTime}</label>
+                            <p>{fd.text}</p>
+                        </li>
+                    </React.Fragment>)
+
                     this.setState({
+                        feedbackData,
                         data,
                         loading: false,
-
                     })
                 },
                 error => {
                     this.setState({
+                        feedackData: false,
                         loading: false
                     });
                 }
             );
         }
-
     }
-
-    handleRegister(e) {
-        e.preventDefault();
-
-    }
-
-
+    
     render() {
         return (
             <div className="container">
@@ -99,10 +154,11 @@ export default class EditProcess extends Component {
                                     <div className="form-group">
                                         <button className="btn btn-primary btn-block">Save</button>
                                     </div>
-
-                                    <div className="form-group">
-                                        <button type="button" className="btn btn-danger btn-block">Delete</button>
-                                    </div>
+                                    {this.state.data.id &&
+                                        <div className="form-group">
+                                           <button type="button" onClick={this.handleDelete} className="btn btn-danger btn-block">Delete</button>
+                                        </div>
+                                    }
                                 </div>
 
 
@@ -122,6 +178,7 @@ export default class EditProcess extends Component {
                                 )}
                             </Form>
                         </div>
+                        {this.state.data.id &&
                         <div className="col-7">
                             <header className="jumbotron p-2">
                                 <h2>Feedback</h2>
@@ -133,10 +190,12 @@ export default class EditProcess extends Component {
                                             type="text"
                                             className="form-control"
                                             name="feedback"
+                                            value={this.state.newFeedback}
+                                            onChange={this.onChangeNewFeedback}
                                         />
                                     </div>
                                     <div className="form-group col-4">
-                                        <button type="button" className="btn btn- btn-block btn-secondary">Send</button>
+                                       <button type="button" onClick={this.handleRegisterFeedback} className="btn btn- btn-block btn-secondary">Send</button>
                                     </div>
                                </div>
                             </Form>
@@ -146,22 +205,14 @@ export default class EditProcess extends Component {
                                     <div class="col-12">
                                         <h4>Latest News</h4>
                                         <ul class="timeline">
-                                            <li>
-                                                <label>New Web Design</label>
-                                                <label class="float-right">21 March, 2014</label>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
-                                            </li>
-                                            <li>
-                                                <label>New Web Design</label>
-                                                <label class="float-right">21 March, 2014</label>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque scelerisque diam non nisi semper, et elementum lorem ornare. Maecenas placerat facilisis mollis. Duis sagittis ligula in sodales vehicula....</p>
-                                            </li>
+                                           {this.state.feedbackData}                                     
                                         </ul>
                                     </div>
                                 </div>
                             </div>
                             
                         </div>
+                        }
                     </div>
                 }
             </div>

@@ -71,8 +71,7 @@ export default class ListProcess extends Component {
     }
     return (
       <div className="container">
-            <header c
-    lassName="jumbotron">
+            <header className="jumbotron">
           <h3>Process</h3>
         </header>
             {!this.state.loading && this.state.postData && 

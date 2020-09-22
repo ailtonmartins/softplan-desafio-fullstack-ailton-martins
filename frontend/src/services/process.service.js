@@ -12,6 +12,20 @@ class ProcessService {
   get(id) {
       return axios.get(API_URL + "/" + id, { headers: authHeader() });
   }
+
+  delete(id) {
+      return axios.delete(API_URL + "/" + id, { headers: authHeader() });
+  }
+
+  saveFeedback( id , feedback ) {
+        return axios
+            .post(API_URL + "/"+ id +"/feedback", {
+                text: feedback
+            }, { headers: authHeader() })
+            .then(response => {
+               return response.data;
+            });
+  }
 }
 
 export default new ProcessService();

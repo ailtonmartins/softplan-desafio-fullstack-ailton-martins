@@ -2,6 +2,7 @@ package com.softplan.backend.models;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.*;
@@ -37,6 +38,10 @@ public class Process {
 				inverseJoinColumns = @JoinColumn(name = "user_id"))
 	private Set<User> users = new HashSet<>();
 	
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name="process_id")
+	@OrderBy("id DESC")
+	private List<Feedback> feedback;	
 	
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -100,6 +105,14 @@ public class Process {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public List<Feedback> getFeedback() {
+		return feedback;
+	}
+
+	public void setFeedback(List<Feedback> feedback) {
+		this.feedback = feedback;
 	}
 	
 	
