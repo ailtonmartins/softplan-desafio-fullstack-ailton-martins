@@ -8,6 +8,10 @@ class ProcessService {
   getAll( page ) {
       return axios.get(API_URL + "?page=" + page, { headers: authHeader() });
   }
+
+  get(id) {
+      return axios.get(API_URL + "/" + id, { headers: authHeader() });
+  }
 }
 
 export default new ProcessService();
