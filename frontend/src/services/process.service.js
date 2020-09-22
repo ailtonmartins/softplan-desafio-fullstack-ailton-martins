@@ -17,9 +17,7 @@ class ProcessService {
       return axios.delete(API_URL + "/" + id, { headers: authHeader() });
   }
 
-  save(id, form) {
-      console.log(id );
-      console.log(form);
+  save(id, form) {    
         if ( id ) {
             return axios.put(API_URL + "/" + id, form
                     , { headers: authHeader() })

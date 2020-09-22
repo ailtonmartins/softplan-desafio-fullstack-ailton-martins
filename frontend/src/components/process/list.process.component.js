@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import processService from "../../services/process.service";
 import ReactPaginate from "react-paginate";
 import { Redirect, Link } from "react-router-dom";
+import authService from "../../services/auth.service";
 
 export default class ListProcess extends Component {
   constructor(props) {
@@ -13,7 +14,8 @@ export default class ListProcess extends Component {
         data: [],
         perPage: 5,
         redirect:false,
-        currentPage: 0
+        currentPage: 0,
+        showNew: false
     };
   }
 
@@ -61,9 +63,15 @@ export default class ListProcess extends Component {
 
     };    
     componentDidMount() {
+        const user = authService.getCurrentUser();
+
+        if (user) {
+            this.setState({
+                showNew: user.roles.includes("ROLE_ADMIN") || user.roles.includes("ROLE_TRIADOR"),
+            });
+        }
         this.loadData();
     }
-
 
   render() {    
     if (this.state.redirect) {
@@ -74,6 +82,10 @@ export default class ListProcess extends Component {
             <header className="jumbotron">
           <h3>Process</h3>
         </header>
+             
+            {this.state.showNew && 
+               <Link className="btn btn-primary mb-2" to={`/process/create`}>New</Link>
+            }
             {!this.state.loading && this.state.postData && 
                 <table class="table">
                     <thead class="thead-dark">

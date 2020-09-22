@@ -7,9 +7,10 @@ import AuthService from "./services/auth.service";
 
 import Login from "./components/login.component";
 import Profile from "./components/profile.component";
-import User from "./components/user.component";
 import ListProcess from "./components/process/list.process.component";
 import EditProcess from "./components/process/edit.process.component";
+import ListUser from "./components/user/list.user.component";
+import EditUser from "./components/user/edit.user.component";
 
 
 class App extends Component {
@@ -115,7 +116,9 @@ class App extends Component {
                     <Switch>
                         <LoginRoute exact path="/login" component={Login} />
                         <PrivateRoute exact path={["/", "/profile"]} component={Profile} />
-                        <PrivateRoute path="/user" component={User} />
+                        <PrivateRoute path="/user/create" component={EditUser} />
+                        <PrivateRoute path="/user/:id" component={EditUser} />
+                        <PrivateRoute path="/user" component={ListUser} />
                         <PrivateRoute path="/process/create" component={EditProcess} />
                         <PrivateRoute path="/process/:id" component={EditProcess} />
                         <PrivateRoute path="/process" component={ListProcess} /> 

@@ -2,15 +2,12 @@ package com.softplan.backend.models;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Date;
-import java.util.List;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
